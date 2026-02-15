@@ -12,6 +12,8 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metadataKey;
+
 @ApplicationScoped
 public class ContextRetriever {
 
@@ -27,20 +29,28 @@ public class ContextRetriever {
     @Inject
     SchemaProvider schemaProvider;
 
+    public String retrieveRelevantContext(String question) {
+        return retrieveRelevantContext(question, null);
+    }
+
     /**
      * Recherche les segments de schéma les plus pertinents pour la question posée.
+     * Si un domainId est fourni, filtre les embeddings par domaine.
      * Les règles métier sont toujours incluses dans le contexte.
      */
-    public String retrieveRelevantContext(String question) {
+    public String retrieveRelevantContext(String question, Long domainId) {
         Embedding queryEmbedding = embeddingModel.embed(question).content();
 
-        EmbeddingSearchRequest request = EmbeddingSearchRequest.builder()
+        EmbeddingSearchRequest.EmbeddingSearchRequestBuilder requestBuilder = EmbeddingSearchRequest.builder()
                 .queryEmbedding(queryEmbedding)
                 .maxResults(MAX_RESULTS)
-                .minScore(MIN_SCORE)
-                .build();
+                .minScore(MIN_SCORE);
 
-        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(request).matches();
+        if (domainId != null) {
+            requestBuilder.filter(metadataKey("domain").isEqualTo(domainId.toString()));
+        }
+
+        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.search(requestBuilder.build()).matches();
 
         String schemaContext;
         if (matches.isEmpty()) {

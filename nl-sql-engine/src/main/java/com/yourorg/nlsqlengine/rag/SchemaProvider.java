@@ -30,7 +30,8 @@ public class SchemaProvider {
                 "Pour les vaisseaux d'un film, utiliser la table film_starships",
                 "La relation entre species et planets est directe via species.homeworld_id (FK vers planets.id), il n'existe PAS de table species_planets",
                 "La relation entre people et planets est directe via people.homeworld_id (FK vers planets.id), il n'existe PAS de table people_planets",
-                "Les seules tables de jointure existantes sont : film_characters, film_planets, film_starships, starship_pilots. Ne jamais inventer d'autres tables de jointure"
+                "Les seules tables de jointure existantes sont : film_characters, film_planets, film_starships, starship_pilots. Ne jamais inventer d'autres tables de jointure",
+                "IMPORTANT — Colonnes VARCHAR à valeur numérique : height, mass, population, diameter, rotation_period, orbital_period, average_height, average_lifespan, cost_in_credits, length, max_atmosphering_speed, crew, passengers, cargo_capacity, hyperdrive_rating, surface_water sont toutes de type VARCHAR (elles peuvent contenir 'unknown' ou 'n/a'). Règles obligatoires : (1) Toujours filtrer d'abord avec WHERE colonne ~ '^[0-9]+(\\.[0-9]+)?$' pour exclure les non-numériques. (2) Toujours utiliser CAST(colonne AS NUMERIC) pour CHAQUE colonne VARCHAR dans une comparaison, un tri, ou une opération arithmétique. Exemple correct : WHERE s.crew ~ '^[0-9]+(\\.[0-9]+)?$' AND CAST(s.crew AS NUMERIC) > 10. Exemple avec calcul : CAST(s.cargo_capacity AS NUMERIC) - CAST(s.crew AS NUMERIC). Ne JAMAIS utiliser une colonne VARCHAR directement avec un opérateur numérique (+, -, *, /, >, <, =nombre)"
         );
     }
 

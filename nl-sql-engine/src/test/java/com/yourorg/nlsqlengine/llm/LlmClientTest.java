@@ -62,4 +62,29 @@ class LlmClientTest {
         assertEquals("SELECT s.name FROM starships s",
                 client.extractSql(raw));
     }
+
+    @Test
+    void extractSql_withSqlPrefix() {
+        String raw = "SQL : SELECT s.name, s.cargo_capacity FROM starships s ORDER BY s.name";
+        assertEquals("SELECT s.name, s.cargo_capacity FROM starships s ORDER BY s.name",
+                client.extractSql(raw));
+    }
+
+    @Test
+    void extractSql_withSqlPrefixNoSpace() {
+        assertEquals("SELECT 1 FROM dual",
+                client.extractSql("SQL:SELECT 1 FROM dual"));
+    }
+
+    @Test
+    void extractSql_withQueryPrefix() {
+        assertEquals("SELECT id FROM people",
+                client.extractSql("Query : SELECT id FROM people"));
+    }
+
+    @Test
+    void extractSql_withRequetePrefix() {
+        assertEquals("SELECT id FROM people",
+                client.extractSql("Requête : SELECT id FROM people"));
+    }
 }

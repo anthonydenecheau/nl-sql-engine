@@ -27,7 +27,7 @@ public class QueryResource {
         }
 
         try {
-            OrchestratorResult result = orchestrator.process(request.question());
+            OrchestratorResult result = orchestrator.process(request.question(), request.domainId());
 
             QueryResponse response = new QueryResponse(
                     result.question(),

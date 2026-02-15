@@ -62,6 +62,52 @@
 
 ## 11. Évolutions futures
 
+### UX avancée — Domaines, prompts et visualisation
+
+#### Domaines fonctionnels
+Le frontend propose un sélecteur de domaine (ex: "Ventes", "RH", "Stock"). Le domaine sélectionné est envoyé au backend pour filtrer le contexte RAG, ce qui améliore drastiquement la pertinence sur un schéma large.
+
+**Backend :**
+- [x] Créer la table `domains(id, name, description)` dans PostgreSQL
+- [x] Associer chaque vue/table à un domaine (table `domain_tables`)
+- [x] `GET /api/domains` — liste les domaines disponibles
+- [x] Ajouter le champ optionnel `domain` dans `QueryRequest`
+- [x] Adapter `ContextRetriever` pour filtrer les embeddings par domaine (metadata filter pgvector)
+
+**Frontend :**
+- [x] Sélecteur de domaine fonctionnel (dropdown ou chips) en amont du champ de saisie
+- [x] Filtrage automatique des prompts suggérés selon le domaine sélectionné
+
+#### Bibliothèque de prompts
+Les utilisateurs peuvent enregistrer des prompts validés et retrouver les plus populaires. Les prompts enregistrés servent aussi de few-shot examples pour le LLM.
+
+**Backend :**
+- [x] Créer la table `saved_prompts(id, domain_id FK, question, sql_generated, usage_count, created_at)`
+- [x] `GET /api/prompts?domain={id}` — liste les prompts enregistrés pour un domaine
+- [x] `GET /api/prompts/popular?domain={id}&limit=5` — prompts les plus utilisés (triés par `usage_count`)
+- [x] `POST /api/prompts` — enregistrer un prompt (question + SQL validé)
+- [x] Incrémenter `usage_count` à chaque réutilisation d'un prompt enregistré
+- [x] Optionnel : utiliser les prompts enregistrés comme few-shot examples dynamiques dans le `PromptBuilder`
+
+**Frontend :**
+- [x] Afficher les prompts populaires du domaine sélectionné (cliquables pour pré-remplir le champ)
+- [x] Liste searchable des prompts enregistrés
+- [x] Bouton "Enregistrer ce prompt" après un résultat réussi
+- [x] Champ libre toujours disponible pour saisir un prompt custom
+
+#### Visualisation des résultats
+Selon les données retournées, proposer différentes mises en forme.
+
+**Frontend :**
+- [x] Vue tabulaire (par défaut) — affichage des résultats sous forme de tableau paginé/triable
+- [x] Vue graphique — détection automatique du type de visualisation pertinent :
+  - Données avec agrégation + labels → bar chart / pie chart
+  - Données avec dimension temporelle → line chart
+  - Données avec 2 mesures numériques → scatter plot
+- [x] Sélecteur manuel du type de graphique (override de la détection auto)
+- [x] Export des résultats (CSV, JSON)
+- Librairie suggérée : **Chart.js** ou **ECharts** (léger, bonne intégration Vue)
+
 ### LangChain4j AI Services avec Tool Use (function calling)
 - [ ] Migrer l'orchestration vers `@RegisterAiService` + `@Tool` de LangChain4j
 - Permettrait au LLM d'appeler des outils Java (introspection schéma, vérification de tables) avant de générer le SQL, au lieu de dépendre uniquement du prompt
@@ -72,3 +118,39 @@
   - **Qwen 2.5 7B** (via Ollama) — bon compromis taille/function calling pour du local
   - **GPT-4 / Claude** (via API externe) — excellent support, mais nécessite une connexion API
 - Impact : pas de ressources matérielles supplémentaires (même infra), mais plus d'appels LLM par requête (latence x2-x4)
+
+### Scaling 100+ tables — Vues métier PostgreSQL + Oracle FDW
+Objectif : permettre à l'application d'interroger un schéma Oracle de 100+ tables sans perdre en qualité de génération SQL.
+
+#### Principe
+- Les tables sources restent dans **Oracle** (source de vérité)
+- **PostgreSQL** expose les données Oracle via `oracle_fdw` (Foreign Data Wrapper)
+- Des **vues métier** PostgreSQL pré-agrègent les jointures complexes par domaine fonctionnel
+- Le **LLM ne voit que les vues** (15-20 vues simples au lieu de 100+ tables avec FK)
+- Les requêtes générées sont de simples SELECT/WHERE/GROUP BY, pas de jointures multi-tables
+
+#### Étapes
+- [ ] Installer `oracle_fdw` + Oracle Instant Client dans le conteneur PostgreSQL
+- [ ] Configurer le serveur distant Oracle (`CREATE SERVER`, `USER MAPPING`)
+- [ ] Importer les foreign tables depuis Oracle (`IMPORT FOREIGN SCHEMA` ou `CREATE FOREIGN TABLE`)
+- [ ] Créer les vues métier par domaine fonctionnel (ex: `v_sales_summary`, `v_employee_directory`)
+- [ ] Adapter `SchemaProvider` pour décrire les vues (pas les tables Oracle)
+- [ ] Adapter `SqlValidator` pour n'autoriser que les vues dans la whitelist
+- [ ] Adapter les embeddings RAG sur les descriptions des vues
+
+#### Performances — deux stratégies selon la fraîcheur des données
+| Stratégie | Fraîcheur | Performance | Cas d'usage |
+|-----------|-----------|-------------|-------------|
+| `oracle_fdw` + vues PG | Temps réel | Dépend du réseau + Oracle | Données critiques, stock, commandes en cours |
+| `MATERIALIZED VIEW` + refresh planifié (`pg_cron`) | Différé (5min, 1h...) | Excellente, tout local PG | Reporting, référentiels stables |
+
+#### Points d'attention
+- Les `JOIN` entre foreign tables s'exécutent côté PG → pour les jointures lourdes, préférer créer la vue côté Oracle et exposer une seule foreign table
+- `oracle_fdw` pousse les `WHERE` vers Oracle (filter pushdown) mais pas tous les opérateurs
+- Prévoir un utilisateur Oracle en **lecture seule** dédié au FDW
+
+### Amélioration du RAG pour schémas larges
+- [ ] Two-stage retrieval : 1) identifier les vues pertinentes, 2) récupérer leur schéma détaillé
+- [ ] Schema compact dans le prompt : `vue(col1, col2, col3)` au lieu des descriptions longues
+- [ ] Reranking avec cross-encoder après la recherche vectorielle
+- [ ] Enrichir les embeddings avec des synonymes et questions typiques par vue

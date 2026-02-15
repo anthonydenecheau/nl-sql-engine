@@ -64,6 +64,9 @@ public class LlmClient {
 
         String trimmed = rawResponse.strip();
 
+        // Supprimer les préfixes courants ajoutés par le LLM (ex: "SQL : ", "SQL:", "Réponse :")
+        trimmed = trimmed.replaceFirst("(?i)^(SQL|Réponse|Requête|Query)\\s*:\\s*", "");
+
         // Supprimer les blocs markdown ```sql ... ```
         if (trimmed.startsWith("```")) {
             int firstNewline = trimmed.indexOf('\n');

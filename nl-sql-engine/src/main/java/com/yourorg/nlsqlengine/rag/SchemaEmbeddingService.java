@@ -127,6 +127,7 @@ public class SchemaEmbeddingService {
 
             Metadata metadata = Metadata.from("type", "table_schema");
             metadata.put("table", tableName);
+            metadata.put("domain", "default");
             segments.add(TextSegment.from(trimmed, metadata));
         }
 
