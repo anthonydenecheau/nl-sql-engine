@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(./mvnw dependency:resolve:*)",
+      "Bash(./mvnw test:*)",
+      "Bash(./mvnw compile:*)",
+      "Bash(docker exec:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(jar tf:*)",
+      "Bash(unzip:*)",
+      "Bash(./mvnw quarkus:dev:*)",
+      "Bash(bash)",
+      "Bash(docker compose:*)"
+    ]
+  }
+}

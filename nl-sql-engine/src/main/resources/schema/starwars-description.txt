@@ -1,0 +1,48 @@
+Base de données Star Wars - Description du schéma
+
+## Tables principales
+
+### planets
+Planètes de l'univers Star Wars.
+Colonnes : id, name, rotation_period, orbital_period, diameter, climate, gravity, terrain, surface_water, population
+
+### species
+Espèces vivantes de l'univers Star Wars.
+Colonnes : id, name, classification, designation, average_height, average_lifespan, language, homeworld_id (FK -> planets)
+
+### people
+Personnages de l'univers Star Wars.
+Colonnes : id, name, height, mass, hair_color, skin_color, eye_color, birth_year, gender, homeworld_id (FK -> planets), species_id (FK -> species)
+
+### films
+Films de la saga Star Wars.
+Colonnes : id, title, episode_id, director, producer, release_date
+
+### starships
+Vaisseaux spatiaux de l'univers Star Wars.
+Colonnes : id, name, model, manufacturer, cost_in_credits, length, max_atmosphering_speed, crew, passengers, cargo_capacity, hyperdrive_rating, starship_class
+
+## Tables de jointure
+
+### film_characters
+Associe les personnages aux films dans lesquels ils apparaissent.
+Colonnes : film_id (FK -> films), person_id (FK -> people)
+
+### film_planets
+Associe les planètes aux films dans lesquels elles apparaissent.
+Colonnes : film_id (FK -> films), planet_id (FK -> planets)
+
+### film_starships
+Associe les vaisseaux aux films dans lesquels ils apparaissent.
+Colonnes : film_id (FK -> films), starship_id (FK -> starships)
+
+### starship_pilots
+Associe les pilotes à leurs vaisseaux.
+Colonnes : starship_id (FK -> starships), person_id (FK -> people)
+
+## Règles métier
+- Les valeurs "unknown" ou "n/a" signifient que l'information n'est pas disponible
+- birth_year est au format "19BBY" (Before Battle of Yavin) ou "19ABY" (After Battle of Yavin)
+- population, diameter, rotation_period, orbital_period sont stockés en VARCHAR car certaines valeurs sont "unknown"
+- Pour joindre un personnage à ses films, utiliser la table film_characters
+- Pour trouver les pilotes d'un vaisseau, utiliser la table starship_pilots
