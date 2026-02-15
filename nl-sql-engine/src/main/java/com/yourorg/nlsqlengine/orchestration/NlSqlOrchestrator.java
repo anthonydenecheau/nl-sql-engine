@@ -41,42 +41,41 @@ public class NlSqlOrchestrator {
         String context = contextRetriever.retrieveRelevantContext(question);
         List<String> businessRules = schemaProvider.getBusinessRules();
 
-        // 2. Générer le SQL avec retries en cas de validation échouée
+        // 2. Générer le SQL avec retries et self-correction
         String sql = null;
-        SqlValidationResult validation = null;
+        String lastError = null;
 
         for (int attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-            // 3. Appeler le LLM
-            sql = llmClient.generateSql(question, context, businessRules, null);
+            // 3. Appeler le LLM (avec feedback d'erreur si retry)
+            sql = llmClient.generateSql(question, context, businessRules, null, lastError);
             LOG.infof("SQL généré (tentative %d) : %s", attempt + 1, sql);
 
             // 4. Valider le SQL
-            validation = sqlValidator.validate(sql);
-            if (validation.valid()) {
-                break;
+            SqlValidationResult validation = sqlValidator.validate(sql);
+            if (!validation.valid()) {
+                lastError = "Validation SQL : " + validation.error();
+                LOG.warnf("SQL invalide (tentative %d) : %s", attempt + 1, validation.error());
+                continue;
             }
-            LOG.warnf("SQL invalide (tentative %d) : %s", attempt + 1, validation.error());
+            sql = validation.sql();
+
+            // 5. Exécuter le SQL
+            try {
+                List<Map<String, Object>> results = sqlExecutor.execute(sql);
+                LOG.infof("Exécution réussie : %d lignes", results.size());
+
+                // 6. Générer la réponse en langage naturel
+                String answer = llmClient.generateAnswer(question, sql, results);
+                LOG.infof("Réponse générée : %s", answer);
+
+                return OrchestratorResult.success(question, sql, results, answer);
+            } catch (Exception e) {
+                lastError = "Exécution SQL : " + e.getMessage();
+                LOG.warnf("Erreur d'exécution (tentative %d) : %s", attempt + 1, e.getMessage());
+            }
         }
 
-        if (!validation.valid()) {
-            return OrchestratorResult.error(question, sql,
-                    "SQL invalide après " + (MAX_RETRIES + 1) + " tentatives : " + validation.error());
-        }
-
-        // 5. Exécuter le SQL
-        try {
-            List<Map<String, Object>> results = sqlExecutor.execute(validation.sql());
-            LOG.infof("Exécution réussie : %d lignes", results.size());
-
-            // 6. Générer la réponse en langage naturel
-            String answer = llmClient.generateAnswer(question, validation.sql(), results);
-            LOG.infof("Réponse générée : %s", answer);
-
-            return OrchestratorResult.success(question, validation.sql(), results, answer);
-        } catch (Exception e) {
-            LOG.errorf("Erreur d'exécution SQL : %s", e.getMessage());
-            return OrchestratorResult.error(question, validation.sql(),
-                    "Erreur d'exécution : " + e.getMessage());
-        }
+        return OrchestratorResult.error(question, sql,
+                "Échec après " + (MAX_RETRIES + 1) + " tentatives : " + lastError);
     }
 }

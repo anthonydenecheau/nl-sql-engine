@@ -21,9 +21,9 @@ public class LlmClient {
     PromptBuilder promptBuilder;
 
     public String generateSql(String question, String schema, List<String> businessRules,
-                              List<Map.Entry<String, String>> fewShotExamples) {
+                              List<Map.Entry<String, String>> fewShotExamples, String previousError) {
         String systemPrompt = promptBuilder.getSystemPrompt();
-        String userPrompt = promptBuilder.buildUserPrompt(question, schema, businessRules, fewShotExamples);
+        String userPrompt = promptBuilder.buildUserPrompt(question, schema, businessRules, fewShotExamples, previousError);
 
         List<ChatMessage> messages = List.of(
                 new SystemMessage(systemPrompt),

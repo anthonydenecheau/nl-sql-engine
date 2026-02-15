@@ -34,7 +34,7 @@ class PromptBuilderTest {
                 Map.entry("Combien de clients ?", "SELECT COUNT(id) AS total FROM clients")
         );
 
-        String prompt = builder.buildUserPrompt("Liste des clients", schema, rules, examples);
+        String prompt = builder.buildUserPrompt("Liste des clients", schema, rules, examples, null);
 
         assertTrue(prompt.contains("## Schéma de la base de données"));
         assertTrue(prompt.contains("CREATE TABLE clients"));
@@ -50,7 +50,7 @@ class PromptBuilderTest {
     @Test
     void buildUserPromptWithoutOptionalSections() {
         String prompt = builder.buildUserPrompt("Liste des clients",
-                "CREATE TABLE clients (id INT);", null, null);
+                "CREATE TABLE clients (id INT);", null, null, null);
 
         assertTrue(prompt.contains("## Schéma de la base de données"));
         assertTrue(prompt.contains("## Question"));
@@ -61,9 +61,22 @@ class PromptBuilderTest {
     @Test
     void buildUserPromptWithEmptyOptionalSections() {
         String prompt = builder.buildUserPrompt("Test",
-                "schema", List.of(), List.of());
+                "schema", List.of(), List.of(), null);
 
         assertFalse(prompt.contains("## Règles métier"));
         assertFalse(prompt.contains("## Exemples"));
+        assertFalse(prompt.contains("## Erreur"));
+    }
+
+    @Test
+    void buildUserPromptWithPreviousError() {
+        String prompt = builder.buildUserPrompt("Test", "schema", null, null,
+                "relation \"species_planets\" does not exist");
+
+        assertTrue(prompt.contains("## Erreur de la tentative précédente"));
+        assertTrue(prompt.contains("species_planets"));
+        assertTrue(prompt.contains("Corrige la requête"));
+        // L'erreur doit apparaître avant la question
+        assertTrue(prompt.indexOf("## Erreur") < prompt.indexOf("## Question"));
     }
 }

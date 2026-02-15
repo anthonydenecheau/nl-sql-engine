@@ -24,7 +24,7 @@ public class PromptBuilder {
     }
 
     public String buildUserPrompt(String question, String schema, List<String> businessRules,
-                                  List<Map.Entry<String, String>> fewShotExamples) {
+                                  List<Map.Entry<String, String>> fewShotExamples, String previousError) {
         StringBuilder sb = new StringBuilder();
 
         // Schéma DB
@@ -48,6 +48,14 @@ public class PromptBuilder {
                 sb.append("Question : ").append(example.getKey()).append("\n");
                 sb.append("SQL : ").append(example.getValue()).append("\n\n");
             }
+        }
+
+        // Feedback d'erreur de la tentative précédente
+        if (previousError != null && !previousError.isBlank()) {
+            sb.append("## Erreur de la tentative précédente\n");
+            sb.append("La requête SQL précédente a échoué avec l'erreur suivante :\n");
+            sb.append(previousError).append("\n");
+            sb.append("Corrige la requête en tenant compte de cette erreur.\n\n");
         }
 
         // Question utilisateur

@@ -45,6 +45,7 @@
 - [x] Implémenter le service d'orchestration NL -> SQL
 - [x] Chaîner : RAG -> Prompt Builder -> LLM -> Validator -> Executor
 - [x] Gestion des erreurs et retries
+- [x] Self-correction avec feedback d'erreur (validation + exécution) renvoyé au LLM lors des retries
 
 ## 9. Sécurité
 - [ ] Authentification (JWT / API key)
@@ -58,3 +59,16 @@
 - [x] Tests REST des endpoints (4 tests)
 - [x] Jeux de données NL <-> SQL attendus (10 cas)
 - [x] Tests du hash repository et du calcul de hash embeddings (5 tests)
+
+## 11. Évolutions futures
+
+### LangChain4j AI Services avec Tool Use (function calling)
+- [ ] Migrer l'orchestration vers `@RegisterAiService` + `@Tool` de LangChain4j
+- Permettrait au LLM d'appeler des outils Java (introspection schéma, vérification de tables) avant de générer le SQL, au lieu de dépendre uniquement du prompt
+- Le LLM pourrait vérifier lui-même l'existence d'une table via `information_schema` avant de l'utiliser
+- **Prérequis modèle** : le function calling nécessite un modèle qui le supporte nativement. Mistral 7B est limité sur ce point. Modèles recommandés :
+  - **Mistral Small / Large** (via API Mistral) — support natif function calling
+  - **Llama 3.1 70B+** (via Ollama) — bon support tools, mais nécessite plus de VRAM (~40 Go)
+  - **Qwen 2.5 7B** (via Ollama) — bon compromis taille/function calling pour du local
+  - **GPT-4 / Claude** (via API externe) — excellent support, mais nécessite une connexion API
+- Impact : pas de ressources matérielles supplémentaires (même infra), mais plus d'appels LLM par requête (latence x2-x4)
