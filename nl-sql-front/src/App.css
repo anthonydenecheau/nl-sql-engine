@@ -653,3 +653,17 @@
   opacity: 0.6;
   cursor: wait;
 }
+
+/* Speak controls group */
+.speak-controls {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.speak-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 3px;
+}

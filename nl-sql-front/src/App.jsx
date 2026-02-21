@@ -93,7 +93,11 @@ function App() {
             <section className="result-section">
               <div className="answer-header">
                 <h2>Réponse</h2>
-                <SpeakButton text={response.answer} />
+                <div className="speak-controls">
+                  <SpeakButton text={response.answer} />
+                  <SpeakButton text={response.answer} voiceMode="wookiee" />
+                  <SpeakButton text={response.answer} voiceMode="r2d2" />
+                </div>
               </div>
               <p className="answer">{response.answer}</p>
             </section>

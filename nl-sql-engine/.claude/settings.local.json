@@ -14,7 +14,8 @@
       "Bash(bash)",
       "Bash(docker compose:*)",
       "Bash(npm install:*)",
-      "Bash(docker ps:*)"
+      "Bash(docker ps:*)",
+      "WebFetch(domain:www.flaticon.com)"
     ]
   }
 }
