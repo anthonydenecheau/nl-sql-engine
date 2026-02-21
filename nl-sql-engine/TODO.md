@@ -108,6 +108,29 @@ Selon les données retournées, proposer différentes mises en forme.
 - [x] Export des résultats (CSV, JSON)
 - Librairie suggérée : **Chart.js** ou **ECharts** (léger, bonne intégration Vue)
 
+### Mode vocal
+Permettre aux utilisateurs de poser leurs questions à l'oral et d'écouter la réponse.
+
+#### Speech-to-Text (voix → texte)
+- [x] **MVP navigateur** : intégrer la Web Speech API (`SpeechRecognition`) côté React pour capturer la voix et injecter le texte dans le champ de saisie (Chrome/Edge uniquement)
+- [x] **Version locale** : déployer Faster-Whisper en conteneur Docker (modèle `medium` ~2 Go VRAM, français), exposer une API HTTP pour la transcription
+- [x] Ajouter un bouton micro dans `QueryForm.jsx` avec indicateur visuel d'écoute
+
+#### Text-to-Speech (texte → voix)
+- [x] **MVP navigateur** : utiliser la `SpeechSynthesis` API pour lire la réponse en langage naturel
+- [x] **Version locale** : déployer Piper TTS en conteneur Docker (voix française, CPU uniquement, ~15 Mo par voix)
+- [x] Ajouter un bouton lecture audio sur la section "Réponse"
+
+#### Budget VRAM estimé (approche tout-local)
+| Composant | VRAM |
+|-----------|------|
+| Mistral 7B (Ollama) | ~5 Go |
+| Faster-Whisper medium | ~2 Go |
+| Piper TTS | CPU uniquement |
+| **Total** | **~7 Go** (RTX 4060 8 Go OK) |
+
+> **Easter egg Chewbacca** : Pour le fun, ajouter une option "Voix Wookiee" dans les paramètres TTS. Piste : utiliser **RVC** (Retrieval-based Voice Conversion) entraîné sur des samples de Chewbacca pour transformer la sortie Piper en rugissements compréhensibles... ou pas. Alternative rapide : appliquer un pitch shift (-8 demi-tons) + distorsion via la **Web Audio API** côté frontend. Rrraaaargh !
+
 ### LangChain4j AI Services avec Tool Use (function calling)
 - [ ] Migrer l'orchestration vers `@RegisterAiService` + `@Tool` de LangChain4j
 - Permettrait au LLM d'appeler des outils Java (introspection schéma, vérification de tables) avant de générer le SQL, au lieu de dépendre uniquement du prompt

@@ -575,3 +575,81 @@
   background: #f0f0f5;
   color: #333;
 }
+
+/* Voice — Mic button */
+.query-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.query-input-row .query-input {
+  flex: 1;
+}
+
+.mic-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mic-btn:hover {
+  border-color: #4361ee;
+}
+
+.mic-btn.listening {
+  border-color: #ef4444;
+  animation: pulse-mic 1s ease-in-out infinite;
+}
+
+@keyframes pulse-mic {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+.mic-btn.transcribing {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Voice — Speak button */
+.answer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.answer-header h2 {
+  margin: 0;
+}
+
+.speak-btn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.speak-btn:hover {
+  border-color: #4361ee;
+}
+
+.speak-btn.speaking {
+  border-color: #4361ee;
+  background: #eef0ff;
+}
+
+.speak-btn.loading {
+  opacity: 0.6;
+  cursor: wait;
+}

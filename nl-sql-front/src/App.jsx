@@ -8,6 +8,7 @@ import ResultTable from './components/ResultTable'
 import ResultChart from './components/ResultChart'
 import SavePromptButton from './components/SavePromptButton'
 import ExportButtons from './components/ExportButtons'
+import SpeakButton from './components/SpeakButton'
 
 const API_URL = import.meta.env.VITE_API_URL || ''
 
@@ -90,7 +91,10 @@ function App() {
         <div className="results">
           {response.answer && (
             <section className="result-section">
-              <h2>Réponse</h2>
+              <div className="answer-header">
+                <h2>Réponse</h2>
+                <SpeakButton text={response.answer} />
+              </div>
               <p className="answer">{response.answer}</p>
             </section>
           )}

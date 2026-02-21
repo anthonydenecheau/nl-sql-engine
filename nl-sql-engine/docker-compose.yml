@@ -39,9 +39,13 @@ services:
     environment:
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/nlsqldb
       QUARKUS_LANGCHAIN4J_OLLAMA_BASE_URL: http://ollama:11434
+      VOICE_WHISPER_URL: http://whisper:8000
+      VOICE_PIPER_URL: http://piper:5000
     depends_on:
       - postgres
       - ollama
+      - whisper
+      - piper
     command: ./mvnw quarkus:dev -Dquarkus.http.host=0.0.0.0
 
   nl-sql-front:
@@ -58,7 +62,35 @@ services:
       - nl-sql-engine
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
 
+  whisper:
+    image: fedirz/faster-whisper-server:latest-cuda
+    container_name: nl-sql-whisper
+    ports:
+      - "8300:8000"
+    environment:
+      WHISPER__MODEL: Systran/faster-whisper-medium
+      WHISPER__DEFAULT_LANGUAGE: fr
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - whisper_cache:/root/.cache
+
+  piper:
+    build: ./piper-tts
+    container_name: nl-sql-piper
+    ports:
+      - "5000:5000"
+    volumes:
+      - piper_data:/app/models
+
 volumes:
   pgdata:
   ollama_data:
   maven_repo:
+  whisper_cache:
+  piper_data:

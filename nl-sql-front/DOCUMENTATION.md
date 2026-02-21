@@ -104,6 +104,41 @@ En sélectionnant un domaine :
 
 ---
 
+## 8. Mode vocal
+
+L'application dispose d'un mode vocal permettant de dicter vos questions et d'écouter les réponses, le tout **100% local et offline**.
+
+### Dicter une question
+
+Cliquez sur le bouton **🎙️** à droite de la zone de saisie pour démarrer l'enregistrement vocal. Le bouton pulse en rouge pendant l'enregistrement.
+
+1. Cliquez sur 🎙️ — le navigateur demande l'accès au micro (à autoriser une seule fois)
+2. Dictez votre question en français
+3. Cliquez à nouveau sur 🎙️ pour arrêter — le bouton affiche ⏳ pendant la transcription
+4. Le texte transcrit apparaît dans la zone de saisie, prêt à être exécuté
+
+> La transcription est réalisée par **Faster-Whisper** (modèle medium, français) qui tourne en local sur le GPU.
+
+### Écouter la réponse
+
+Après l'exécution d'une question, un bouton **🔊** apparaît à côté du titre "Réponse".
+
+1. Cliquez sur 🔊 — le bouton affiche ⏳ pendant le chargement
+2. La réponse est lue à voix haute via **Piper TTS** (voix française siwis-medium)
+3. Cliquez sur ⏹️ pour arrêter la lecture en cours
+
+> La synthèse vocale est réalisée par **Piper TTS** qui tourne en local sur le CPU, sans consommer de VRAM.
+
+### Prérequis
+
+Les services vocaux doivent être lancés via Docker Compose :
+
+```bash
+docker compose up -d whisper piper
+```
+
+---
+
 ## Raccourcis clavier
 
 | Raccourci | Action |

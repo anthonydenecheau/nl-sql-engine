@@ -13,7 +13,8 @@
       "Bash(./mvnw quarkus:dev:*)",
       "Bash(bash)",
       "Bash(docker compose:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(docker ps:*)"
     ]
   }
 }
