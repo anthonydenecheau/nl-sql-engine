@@ -112,12 +112,12 @@ Selon les données retournées, proposer différentes mises en forme.
 Permettre aux utilisateurs de poser leurs questions à l'oral et d'écouter la réponse.
 
 #### Speech-to-Text (voix → texte)
-- [x] **MVP navigateur** : intégrer la Web Speech API (`SpeechRecognition`) côté React pour capturer la voix et injecter le texte dans le champ de saisie (Chrome/Edge uniquement)
+~~- [x] **MVP navigateur** : intégrer la Web Speech API (`SpeechRecognition`) côté React pour capturer la voix et injecter le texte dans le champ de saisie (Chrome/Edge uniquement)~~
 - [x] **Version locale** : déployer Faster-Whisper en conteneur Docker (modèle `medium` ~2 Go VRAM, français), exposer une API HTTP pour la transcription
 - [x] Ajouter un bouton micro dans `QueryForm.jsx` avec indicateur visuel d'écoute
 
 #### Text-to-Speech (texte → voix)
-- [x] **MVP navigateur** : utiliser la `SpeechSynthesis` API pour lire la réponse en langage naturel
+~~- [x] **MVP navigateur** : utiliser la `SpeechSynthesis` API pour lire la réponse en langage naturel~~
 - [x] **Version locale** : déployer Piper TTS en conteneur Docker (voix française, CPU uniquement, ~15 Mo par voix)
 - [x] Ajouter un bouton lecture audio sur la section "Réponse"
 
