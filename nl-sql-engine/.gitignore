@@ -45,7 +45,4 @@ nb-configuration.xml
 .certs/
 
 # piper-tts
-/piper-ts/samples/
-D
-D
-#piper
+/piper-tts/samples/
