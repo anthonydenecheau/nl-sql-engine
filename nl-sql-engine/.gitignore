@@ -43,3 +43,9 @@ nb-configuration.xml
 /.quarkus/cli/plugins/
 # TLS Certificates
 .certs/
+
+# piper-tts
+/piper-ts/samples/
+D
+D
+#piper
